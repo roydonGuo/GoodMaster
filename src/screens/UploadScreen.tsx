@@ -9,6 +9,8 @@ import {
   View,
   Image,
 } from 'react-native';
+// @ts-ignore
+import LinearGradient from 'react-native-linear-gradient';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Theme } from '../theme';
@@ -138,39 +140,35 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.bg }]}>
+    <LinearGradient
+      colors={['#fffaf5', '#fef6ee', '#f7f0ff']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.gradientBg, { paddingTop: insets.top + 20 }]}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + 12 },
-        ]}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        {/* 标题区域 */}
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.text }]}>
-            {editingItem ? '编辑' : '上传'}
+        {/* 顶部标题区域 */}
+        <View style={styles.headerCard}>
+          <Text style={styles.headerTitle}>
+            {editingItem ? '编辑资产' : '添加新资产'}
           </Text>
-          <Text style={[styles.subtitle, { color: theme.muted }]}>
-            {editingItem
-              ? '修改物品信息'
-              : '快速上传你的宝贝'}
+          <Text style={styles.headerSubtitle}>
+            上传图片并填写基础信息
           </Text>
         </View>
 
         {/* 图片上传与预览 */}
         <View style={styles.formGroup}>
-          <Text style={[styles.label, { color: theme.text }]}>物品图片</Text>
+          <Text style={[styles.label, { color: '#6b7280' }]}>物品图片</Text>
           <TouchableOpacity
-            style={[
-              styles.uploadBox,
-              { backgroundColor: theme.card, borderColor: theme.muted + '40' },
-            ]}
-            activeOpacity={0.8}
+            style={styles.uploadBox}
+            activeOpacity={0.92}
             onPress={async () => {
               const res = await launchImageLibrary({
                 mediaType: 'photo',
-                quality: 0.9,
+                quality: 0.92,
               });
               if (res.didCancel) return;
               const uri = res.assets?.[0]?.uri;
@@ -179,39 +177,49 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
               }
             }}>
             {imagePath ? (
-              <Image source={{ uri: imagePath }} style={styles.previewImage} />
+              <View style={styles.previewWrapper}>
+                <Image source={{ uri: imagePath }} style={styles.previewImage} />
+              </View>
             ) : (
-              <Text style={[styles.uploadText, { color: theme.muted }]}>
-                点击选择图片
-              </Text>
+              <View style={styles.uploadPlaceholder}>
+                <View style={styles.uploadIcon}>
+                  <Text style={styles.uploadIconText}>📷</Text>
+                </View>
+                <Text style={[styles.uploadText, { color: '#5f6368' }]}>
+                  点击拍照或上传图片
+                </Text>
+                <Text style={[styles.uploadSubText, { color: '#9ca3af' }]}>
+                  支持 jpg / png
+                </Text>
+              </View>
             )}
           </TouchableOpacity>
         </View>
 
         {/* 表单区域 */}
-        <View style={styles.form}>
+        <View style={styles.glassCard}>
           {/* 物品名称 */}
           <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>物品名称 *</Text>
+            <Text style={[styles.label, { color: '#111827' }]}>物品名称 *</Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  backgroundColor: theme.card,
-                  color: theme.text,
-                  borderColor: theme.muted + '40',
+                  backgroundColor: 'rgba(255,255,255,0.92)',
+                  color: '#111827',
+                  borderColor: 'rgba(148,163,184,0.4)',
                 },
               ]}
               value={name}
               onChangeText={setName}
               placeholder="请输入物品名称"
-              placeholderTextColor={theme.muted}
+              placeholderTextColor="#9ca3af"
             />
           </View>
 
           {/* 分类选择 */}
           <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>分类 *</Text>
+            <Text style={[styles.label, { color: '#111827' }]}>分类 *</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -232,7 +240,7 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
 
           {/* 状态选择 */}
           <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>状态 *</Text>
+            <Text style={[styles.label, { color: '#111827' }]}>状态 *</Text>
             <View style={styles.statusContainer}>
               {statusOptions.map(option => (
                 <TouchableOpacity
@@ -262,14 +270,14 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
 
           {/* 价格 */}
           <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>价格 *</Text>
+            <Text style={[styles.label, { color: '#111827' }]}>价格 *</Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  backgroundColor: theme.card,
-                  color: theme.text,
-                  borderColor: theme.muted + '40',
+                  backgroundColor: 'rgba(255,255,255,0.92)',
+                  color: '#111827',
+                  borderColor: 'rgba(148,163,184,0.4)',
                 },
               ]}
               value={price}
@@ -282,14 +290,14 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
 
           {/* 入手时间 */}
           <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>入手时间 *</Text>
+            <Text style={[styles.label, { color: '#111827' }]}>入手时间 *</Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  backgroundColor: theme.card,
-                  color: theme.text,
-                  borderColor: theme.muted + '40',
+                  backgroundColor: 'rgba(255,255,255,0.92)',
+                  color: '#111827',
+                  borderColor: 'rgba(148,163,184,0.4)',
                 },
               ]}
               value={purchaseDate}
@@ -333,11 +341,16 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
         {/* 占位 */}
         <View style={styles.placeholder} />
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradientBg: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+  },
   container: {
     flex: 1,
   },
@@ -349,19 +362,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 20,
   },
-  header: {
-    marginBottom: 20,
-    gap: 4,
+  headerCard: {
+    backgroundColor: 'rgba(255,255,255,0.82)',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 0.5,
+    borderColor: 'rgba(148,163,184,0.4)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
-  subtitle: {
-    fontSize: 14,
+  headerSubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: '#6b7280',
   },
   form: {
     gap: 20,
+    marginTop: 8,
   },
   formGroup: {
     gap: 8,
@@ -384,15 +410,60 @@ const styles = StyleSheet.create({
     minHeight: 140,
     alignItems: 'center',
     justifyContent: 'center',
+    borderColor: 'rgba(148,163,184,0.4)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  previewWrapper: {
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   previewImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 10,
+    height: 220,
+    borderRadius: 12,
     resizeMode: 'cover',
   },
   uploadText: {
     fontSize: 14,
+  },
+  uploadSubText: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  uploadPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  uploadIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: '#ede9fe',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  uploadIconText: {
+    fontSize: 20,
+  },
+  glassCard: {
+    backgroundColor: 'rgba(255,255,255,0.88)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 0.5,
+    borderColor: 'rgba(148,163,184,0.35)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 4,
+    gap: 20,
   },
   textArea: {
     borderWidth: 1,
