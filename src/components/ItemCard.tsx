@@ -6,6 +6,7 @@ import {
   Pressable,
   View,
   Animated,
+  Image,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { Item } from '../types/item';
@@ -139,9 +140,13 @@ function ItemCard({ item, theme, onEdit, onDelete }: Props) {
               transform: [{ scale: pressAnim }],
             },
           ]}>
-          <View style={[styles.iconContainer, { backgroundColor: theme.bg }]}>
-            <IconComponent size={32} color={theme.accent} />
-          </View>
+          {item.imagePath ? (
+            <Image source={{ uri: item.imagePath }} style={styles.image} />
+          ) : (
+            <View style={[styles.iconContainer, { backgroundColor: theme.bg }]}>
+              <IconComponent size={32} color={theme.accent} />
+            </View>
+          )}
           <View style={styles.content}>
             <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
               {item.name}
@@ -190,6 +195,12 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 6,
     elevation: 1,
+  },
+  image: {
+    width: 64,
+    height: 64,
+    borderRadius: 14,
+    backgroundColor: '#f5f5f5',
   },
   iconContainer: {
     width: 48,

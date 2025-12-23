@@ -7,7 +7,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Theme } from '../theme';
 import { categories } from '../../data';
@@ -37,6 +39,7 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
   const [price, setPrice] = useState(
     editingItem?.price.toString() || '',
   );
+  const [imagePath, setImagePath] = useState(editingItem?.imagePath || '');
   const [description, setDescription] = useState(
     editingItem?.description || '',
   );
@@ -51,6 +54,7 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
       setCategoryId(editingItem.categoryId);
       setStatus(editingItem.status);
       setPrice(editingItem.price.toString());
+      setImagePath(editingItem.imagePath || '');
       setDescription(editingItem.description || '');
       setPurchaseDate(editingItem.purchaseDate);
     } else {
@@ -59,6 +63,7 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
       setCategoryId('');
       setStatus('服役中');
       setPrice('');
+      setImagePath('');
       setDescription('');
       setPurchaseDate(new Date().toISOString().split('T')[0]);
     }
@@ -89,6 +94,7 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
         status,
         price: Number(price),
         icon: selectedCategory?.icon || editingItem?.icon || 'package',
+        imagePath: imagePath || undefined,
         description: description.trim() || undefined,
         purchaseDate,
       };
@@ -114,6 +120,7 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
               setCategoryId('');
               setStatus('服役中');
               setPrice('');
+              setImagePath('');
               setDescription('');
               setPurchaseDate(new Date().toISOString().split('T')[0]);
               onItemAdded?.();
@@ -149,6 +156,36 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
               ? '修改物品信息'
               : '快速上传你的宝贝'}
           </Text>
+        </View>
+
+        {/* 图片上传与预览 */}
+        <View style={styles.formGroup}>
+          <Text style={[styles.label, { color: theme.text }]}>物品图片</Text>
+          <TouchableOpacity
+            style={[
+              styles.uploadBox,
+              { backgroundColor: theme.card, borderColor: theme.muted + '40' },
+            ]}
+            activeOpacity={0.8}
+            onPress={async () => {
+              const res = await launchImageLibrary({
+                mediaType: 'photo',
+                quality: 0.9,
+              });
+              if (res.didCancel) return;
+              const uri = res.assets?.[0]?.uri;
+              if (uri) {
+                setImagePath(uri);
+              }
+            }}>
+            {imagePath ? (
+              <Image source={{ uri: imagePath }} style={styles.previewImage} />
+            ) : (
+              <Text style={[styles.uploadText, { color: theme.muted }]}>
+                点击选择图片
+              </Text>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* 表单区域 */}
@@ -338,6 +375,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
+    fontSize: 14,
+  },
+  uploadBox: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    minHeight: 140,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    resizeMode: 'cover',
+  },
+  uploadText: {
     fontSize: 14,
   },
   textArea: {

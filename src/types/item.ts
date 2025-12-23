@@ -13,6 +13,7 @@ export type Item = {
   status: ItemStatus;
   price: number;
   icon: string; // lucide icon name
+  imagePath?: string; // 本地图片路径
   description?: string;
   purchaseDate: string; // 入手时间，格式：YYYY-MM-DD
 };

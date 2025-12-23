@@ -23,10 +23,18 @@ export const initDatabase = async (): Promise<void> => {
         status TEXT NOT NULL,
         price REAL NOT NULL,
         icon TEXT NOT NULL,
+        imagePath TEXT,
         description TEXT,
         purchaseDate TEXT NOT NULL
       )
     `);
+
+    // 迁移：尝试添加 imagePath 列，若已存在则忽略
+    try {
+      await db.executeSql(`ALTER TABLE items ADD COLUMN imagePath TEXT`);
+    } catch (e) {
+      // ignore
+    }
 
     // 检查是否有数据，如果没有则插入初始数据
     const [result] = await db.executeSql('SELECT COUNT(*) as count FROM items');
@@ -92,8 +100,8 @@ export const getDatabase = (): any => {
 export const insertItem = async (item: Item): Promise<void> => {
   const database = getDatabase();
   await database.executeSql(
-    `INSERT INTO items (id, name, categoryId, status, price, icon, description, purchaseDate)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO items (id, name, categoryId, status, price, icon, imagePath, description, purchaseDate)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       item.id,
       item.name,
@@ -101,6 +109,7 @@ export const insertItem = async (item: Item): Promise<void> => {
       item.status,
       item.price,
       item.icon,
+      item.imagePath || null,
       item.description || null,
       item.purchaseDate,
     ],
@@ -123,6 +132,7 @@ export const getAllItems = async (): Promise<Item[]> => {
       status: row.status as Item['status'],
       price: row.price,
       icon: row.icon,
+    imagePath: row.imagePath || undefined,
       description: row.description,
       purchaseDate: row.purchaseDate,
     });
@@ -148,6 +158,7 @@ export const getItemsByCategory = async (categoryId: string): Promise<Item[]> =>
       status: row.status as Item['status'],
       price: row.price,
       icon: row.icon,
+    imagePath: row.imagePath || undefined,
       description: row.description,
       purchaseDate: row.purchaseDate,
     });
@@ -160,7 +171,7 @@ export const updateItem = async (item: Item): Promise<void> => {
   const database = getDatabase();
   await database.executeSql(
     `UPDATE items 
-     SET name = ?, categoryId = ?, status = ?, price = ?, icon = ?, description = ?, purchaseDate = ?
+     SET name = ?, categoryId = ?, status = ?, price = ?, icon = ?, imagePath = ?, description = ?, purchaseDate = ?
      WHERE id = ?`,
     [
       item.name,
@@ -168,6 +179,7 @@ export const updateItem = async (item: Item): Promise<void> => {
       item.status,
       item.price,
       item.icon,
+      item.imagePath || null,
       item.description || null,
       item.purchaseDate,
       item.id,
