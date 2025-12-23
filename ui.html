@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Master - Glassmorphism UI</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            glass: {
+              100: 'rgba(255, 255, 255, 0.1)',
+              200: 'rgba(255, 255, 255, 0.2)',
+              300: 'rgba(255, 255, 255, 0.3)',
+              400: 'rgba(255, 255, 255, 0.4)',
+              border: 'rgba(255, 255, 255, 0.5)',
+            },
+            brand: {
+              orange: '#FF8A5B',
+              dark: '#1A1A1A',
+              text: '#4A4A4A',
+              bg: '#FDFCF8'
+            }
+          },
+          boxShadow: {
+            'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+            'glass-hover': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 全局样式与动画 */
+    body {
+      background-color: #FDFCF8;
+      /* 背景光斑 */
+      background-image:
+        radial-gradient(at 10% 10%, rgba(255, 138, 91, 0.15) 0px, transparent 50%),
+        radial-gradient(at 90% 0%, rgba(255, 218, 185, 0.3) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(255, 138, 91, 0.05) 0px, transparent 50%),
+        radial-gradient(at 80% 100%, rgba(255, 138, 91, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* 隐藏滚动条但保留功能 */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* 折线图动画 */
+    .chart-line {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: dash 2.5s ease-out forwards;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    /* 浮动微动画 */
+    .hover-float {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-float:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 玻璃拟态基础类 */
+    .glass-panel {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+    }
+
+    .glass-input {
+      background: rgba(255, 255, 255, 0.5);
+      border: none;
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.02), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+    }
+
+    .glass-input:focus {
+      background: rgba(255, 255, 255, 0.8);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 138, 91, 0.3);
+    }
+
+    /* 手机边框模拟 */
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      border-radius: 40px;
+      overflow: hidden;
+      position: relative;
+      background: rgba(255, 255, 255, 0.4);
+      box-shadow:
+        0 0 0 12px #ffffff,
+        0 0 0 13px #e5e5e5,
+        20px 20px 60px rgba(0, 0, 0, 0.1);
+      /* 确保内容在遮罩内 */
+      transform: scale(0.9);
+      /* 稍微缩小以适应屏幕预览 */
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center py-10 font-sans text-brand-dark">
+
+  <!-- 图标系统 -->
+  <svg style="display: none;">
+    <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+    </symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </symbol>
+    <symbol id="icon-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+      <circle cx="12" cy="13" r="4"></circle>
+    </symbol>
+    <symbol id="icon-battery" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="2" y="7" width="16" height="10" rx="2" ry="2" stroke="currentColor" stroke-width="1.5" fill="none">
+      </rect>
+      <rect x="4" y="9" width="10" height="6" rx="1" ry="1"></rect>
+      <line x1="20" y1="10" x2="20" y2="14" stroke="currentColor" stroke-width="2"></line>
+    </symbol>
+    <symbol id="icon-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+      <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+      <line x1="12" y1="20" x2="12.01" y2="20"></line>
+    </symbol>
+    <symbol id="icon-signal" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="2" y="14" width="4" height="6" rx="1"></rect>
+      <rect x="8" y="10" width="4" height="10" rx="1"></rect>
+      <rect x="14" y="6" width="4" height="14" rx="1"></rect>
+      <rect x="20" y="2" width="4" height="18" rx="1" fill-opacity="0.3"></rect>
+    </symbol>
+  </svg>
+
+  <!-- 容器：横向排列3个页面 -->
+  <div class="flex flex-wrap justify-center gap-12 w-full max-w-[1400px]">
+
+    <!-- ================= PAGE 1: 物品列表 (Home) ================= -->
+    <div class="phone-frame flex flex-col relative bg-[#FDFCF8]/90">
+      <!-- 装饰背景球 -->
+      <div class="absolute -top-20 -left-20 w-64 h-64 bg-brand-orange/20 rounded-full blur-3xl pointer-events-none">
+      </div>
+
+      <!-- 状态栏 -->
+      <div class="h-11 w-full flex justify-between items-end px-6 pb-2 z-50 text-brand-dark text-xs font-semibold">
+        <span>9:41</span>
+        <div class="flex gap-1.5 items-center">
+          <svg class="w-4 h-4">
+            <use href="#icon-signal"></use>
+          </svg>
+          <svg class="w-4 h-4">
+            <use href="#icon-wifi"></use>
+          </svg>
+          <svg class="w-5 h-5">
+            <use href="#icon-battery"></use>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 主内容区域 (Scrollable) -->
+      <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-4 pb-24 z-10">
+        <!-- 头部 -->
+        <header class="mb-8">
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <p class="text-gray-400 text-sm mb-1">总资产估值</p>
+              <h1 class="text-4xl font-bold tracking-tight text-brand-dark">¥ 128,450</h1>
+            </div>
+            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-md">
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
+                alt="Avatar" class="w-full h-full object-cover">
+            </div>
+          </div>
+
+          <!-- 搜索框 -->
+          <div class="glass-panel rounded-2xl p-1 flex items-center mb-6">
+            <div class="p-3 text-gray-400">
+              <svg class="w-5 h-5">
+                <use href="#icon-search"></use>
+              </svg>
+            </div>
+            <input type="text" placeholder="搜索物品..."
+              class="bg-transparent w-full outline-none text-brand-dark placeholder-gray-400 text-sm h-full">
+          </div>
+
+          <!-- 分类标签 -->
+          <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+            <button
+              class="bg-brand-dark text-white px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap shadow-lg">全部</button>
+            <button
+              class="glass-panel text-gray-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-white/40">数码</button>
+            <button
+              class="glass-panel text-gray-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-white/40">摄影</button>
+            <button
+              class="glass-panel text-gray-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-white/40">收藏</button>
+          </div>
+        </header>
+
+        <!-- 物品列表 (瀑布流模拟) -->
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Item 1 -->
+          <div class="glass-panel rounded-3xl p-3 hover-float group cursor-pointer">
+            <div class="relative w-full h-32 rounded-2xl overflow-hidden mb-3 bg-gray-100">
+              <img
+                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Watch">
+              <div
+                class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-lg text-xs font-bold text-brand-dark shadow-sm">
+                数码</div>
+            </div>
+            <h3 class="font-bold text-brand-dark ml-1">Apple Watch</h3>
+            <p class="text-brand-orange font-semibold text-sm ml-1 mt-1">¥ 2,899</p>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="glass-panel rounded-3xl p-3 hover-float group cursor-pointer mt-6">
+            <div class="relative w-full h-40 rounded-2xl overflow-hidden mb-3 bg-gray-100">
+              <img
+                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                alt="Sneakers">
+              <div
+                class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-lg text-xs font-bold text-brand-dark shadow-sm">
+                鞋靴</div>
+            </div>
+            <h3 class="font-bold text-brand-dark ml-1">Nike Red</h3>
+            <p class="text-brand-orange font-semibold text-sm ml-1 mt-1">¥ 1,299</p>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="glass-panel rounded-3xl p-3 hover-float group cursor-pointer">
+            <div class="relative w-full h-36 rounded-2xl overflow-hidden mb-3 bg-gray-100">
+              <img
+                src="https://images.unsplash.com/photo-1517336714731-489689fd1ca4?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                alt="Macbook">
+              <div
+                class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-lg text-xs font-bold text-brand-dark shadow-sm">
+                办公</div>
+            </div>
+            <h3 class="font-bold text-brand-dark ml-1">MacBook Pro</h3>
+            <p class="text-brand-orange font-semibold text-sm ml-1 mt-1">¥ 14,500</p>
+          </div>
+
+          <!-- Item 4 -->
+          <div class="glass-panel rounded-3xl p-3 hover-float group cursor-pointer mt-6">
+            <div class="relative w-full h-32 rounded-2xl overflow-hidden mb-3 bg-gray-100">
+              <img
+                src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Camera">
+              <div
+                class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-lg text-xs font-bold text-brand-dark shadow-sm">
+                摄影</div>
+            </div>
+            <h3 class="font-bold text-brand-dark ml-1">Leica M6</h3>
+            <p class="text-brand-orange font-semibold text-sm ml-1 mt-1">¥ 32,000</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Bar -->
+      <div
+        class="absolute bottom-0 w-full px-6 pb-8 pt-4 bg-white/70 backdrop-blur-xl border-t border-white/50 flex justify-between items-center z-50 rounded-b-[38px]">
+        <button class="flex flex-col items-center gap-1 text-brand-orange">
+          <svg class="w-6 h-6">
+            <use href="#icon-home"></use>
+          </svg>
+          <span class="text-[10px] font-medium">物品</span>
+        </button>
+        <button
+          class="absolute left-1/2 -top-6 transform -translate-x-1/2 bg-brand-dark text-white p-4 rounded-full shadow-lg shadow-brand-dark/30 hover:scale-105 transition-transform">
+          <svg class="w-6 h-6">
+            <use href="#icon-plus"></use>
+          </svg>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-brand-dark transition-colors">
+          <svg class="w-6 h-6">
+            <use href="#icon-user"></use>
+          </svg>
+          <span class="text-[10px] font-medium">我的</span>
+        </button>
+      </div>
+      <!-- Home Indicator -->
+      <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-gray-300 rounded-full z-50"></div>
+    </div>
+
+    <!-- ================= PAGE 2: 添加物品 (Upload) ================= -->
+    <div class="phone-frame flex flex-col relative bg-[#FDFCF8]/90">
+      <!-- 装饰背景 -->
+      <div class="absolute top-1/2 right-0 w-64 h-64 bg-purple-200/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- 状态栏 -->
+      <div class="h-11 w-full flex justify-between items-end px-6 pb-2 z-50 text-brand-dark text-xs font-semibold">
+        <span>9:42</span>
+        <div class="flex gap-1.5 items-center">
+          <svg class="w-4 h-4">
+            <use href="#icon-signal"></use>
+          </svg>
+          <svg class="w-4 h-4">
+            <use href="#icon-wifi"></use>
+          </svg>
+          <svg class="w-5 h-5">
+            <use href="#icon-battery"></use>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 内容 -->
+      <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-6 pb-24 z-10">
+        <h2 class="text-2xl font-bold text-brand-dark mb-6">添加新资产</h2>
+
+        <!-- 上传区域 -->
+        <div
+          class="glass-panel w-full aspect-square rounded-3xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center mb-8 hover:border-brand-orange/50 transition-colors cursor-pointer group">
+          <div
+            class="w-16 h-16 rounded-full bg-white/60 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
+            <svg class="w-8 h-8 text-brand-orange">
+              <use href="#icon-camera"></use>
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-gray-500">点击拍照或上传图片</p>
+        </div>
+
+        <!-- 表单 -->
+        <form class="space-y-5">
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-gray-400 ml-3 uppercase tracking-wider">物品名称</label>
+            <input type="text" class="w-full h-14 rounded-2xl px-5 glass-input text-brand-dark font-medium"
+              value="Herman Miller Aeron">
+          </div>
+
+          <div class="flex gap-4">
+            <div class="space-y-2 w-2/3">
+              <label class="text-xs font-bold text-gray-400 ml-3 uppercase tracking-wider">价格</label>
+              <input type="text" class="w-full h-14 rounded-2xl px-5 glass-input text-brand-dark font-medium"
+                value="8,500">
+            </div>
+            <div class="space-y-2 w-1/3">
+              <label class="text-xs font-bold text-gray-400 ml-3 uppercase tracking-wider">货币</label>
+              <select class="w-full h-14 rounded-2xl px-4 glass-input text-brand-dark font-medium appearance-none">
+                <option>CNY</option>
+                <option>USD</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-gray-400 ml-3 uppercase tracking-wider">分类</label>
+            <div class="flex gap-2 flex-wrap">
+              <span
+                class="px-4 py-2 rounded-xl bg-brand-orange text-white text-sm font-medium shadow-lg shadow-brand-orange/30">家具</span>
+              <span class="px-4 py-2 rounded-xl glass-panel text-gray-500 text-sm font-medium">数码</span>
+              <span class="px-4 py-2 rounded-xl glass-panel text-gray-500 text-sm font-medium">服饰</span>
+              <span
+                class="px-4 py-2 rounded-xl glass-panel text-gray-500 text-sm flex items-center justify-center w-10">+</span>
+            </div>
+          </div>
+
+          <div class="pt-4">
+            <button type="button"
+              class="w-full h-14 bg-brand-dark text-white rounded-2xl font-bold text-lg shadow-xl shadow-brand-dark/20 hover:shadow-brand-dark/40 transition-all hover:-translate-y-1">
+              确认添加
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tab Bar (Inactive State Visuals) -->
+      <div
+        class="absolute bottom-0 w-full px-6 pb-8 pt-4 bg-white/70 backdrop-blur-xl border-t border-white/50 flex justify-between items-center z-50 rounded-b-[38px]">
+        <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-brand-dark transition-colors">
+          <svg class="w-6 h-6">
+            <use href="#icon-home"></use>
+          </svg>
+          <span class="text-[10px] font-medium">物品</span>
+        </button>
+        <button
+          class="absolute left-1/2 -top-6 transform -translate-x-1/2 bg-brand-orange text-white p-4 rounded-full shadow-lg shadow-brand-orange/30 scale-110">
+          <svg class="w-6 h-6">
+            <use href="#icon-plus"></use>
+          </svg>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-brand-dark transition-colors">
+          <svg class="w-6 h-6">
+            <use href="#icon-user"></use>
+          </svg>
+          <span class="text-[10px] font-medium">我的</span>
+        </button>
+      </div>
+      <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-gray-300 rounded-full z-50"></div>
+    </div>
+
+    <!-- ================= PAGE 3: 我的统计 (Profile) ================= -->
+    <div class="phone-frame flex flex-col relative bg-[#FDFCF8]/90">
+      <!-- 装饰背景 -->
+      <div
+        class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-orange-50/50 to-transparent pointer-events-none">
+      </div>
+
+      <!-- 状态栏 -->
+      <div class="h-11 w-full flex justify-between items-end px-6 pb-2 z-50 text-brand-dark text-xs font-semibold">
+        <span>9:43</span>
+        <div class="flex gap-1.5 items-center">
+          <svg class="w-4 h-4">
+            <use href="#icon-signal"></use>
+          </svg>
+          <svg class="w-4 h-4">
+            <use href="#icon-wifi"></use>
+          </svg>
+          <svg class="w-5 h-5">
+            <use href="#icon-battery"></use>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 内容 -->
+      <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-6 pb-24 z-10">
+
+        <!-- 个人信息卡片 -->
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-16 h-16 rounded-full p-1 bg-white shadow-lg">
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
+              alt="Avatar" class="w-full h-full rounded-full object-cover">
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-brand-dark">Sarah Chen</h2>
+            <p class="text-xs text-gray-500 font-medium">加入时间 2023.10</p>
+          </div>
+          <button class="ml-auto w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-600">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 统计概览 -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="glass-panel p-4 rounded-2xl">
+            <p class="text-xs text-gray-500 mb-1">物品数量</p>
+            <p class="text-2xl font-bold text-brand-dark">42 <span class="text-sm font-normal text-gray-400">件</span>
+            </p>
+          </div>
+          <div class="glass-panel p-4 rounded-2xl bg-brand-dark/5">
+            <p class="text-xs text-gray-500 mb-1">本月新增</p>
+            <p class="text-2xl font-bold text-brand-orange">+3 <span class="text-sm font-normal text-gray-400">件</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- 动态折线图卡片 -->
+        <div class="glass-panel rounded-3xl p-5 mb-6 relative overflow-hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-brand-dark">资产趋势</h3>
+            <div class="text-xs bg-white/50 px-2 py-1 rounded-md text-gray-500">近6个月</div>
+          </div>
+
+          <!-- SVG Chart -->
+          <div class="w-full h-40 relative">
+            <!-- Grid Lines -->
+            <div class="absolute inset-0 flex flex-col justify-between text-[10px] text-gray-300">
+              <div class="border-b border-gray-200 border-dashed w-full h-0"></div>
+              <div class="border-b border-gray-200 border-dashed w-full h-0"></div>
+              <div class="border-b border-gray-200 border-dashed w-full h-0"></div>
+              <div class="border-b border-gray-200 border-dashed w-full h-0"></div>
+            </div>
+
+            <!-- Chart Line -->
+            <svg class="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#FF8A5B;stop-opacity:0.3" />
+                  <stop offset="100%" style="stop-color:#FF8A5B;stop-opacity:0" />
+                </linearGradient>
+              </defs>
+              <!-- Fill Area -->
+              <path d="M0,100 C40,90 80,110 120,60 C160,10 200,40 240,30 V160 H0 Z" fill="url(#gradient)" />
+              <!-- Animated Line -->
+              <path d="M0,100 C40,90 80,110 120,60 C160,10 200,40 240,30" fill="none" stroke="#FF8A5B" stroke-width="3"
+                stroke-linecap="round" class="chart-line" />
+              <!-- Points -->
+              <circle cx="0" cy="100" r="3" fill="white" stroke="#FF8A5B" stroke-width="2" />
+              <circle cx="120" cy="60" r="3" fill="white" stroke="#FF8A5B" stroke-width="2" />
+              <circle cx="240" cy="30" r="4" fill="#FF8A5B" stroke="white" stroke-width="2" class="animate-pulse" />
+            </svg>
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-400 mt-2 px-1">
+            <span>1月</span>
+            <span>3月</span>
+            <span>6月</span>
+          </div>
+        </div>
+
+        <!-- 功能列表 -->
+        <div class="space-y-3">
+          <div
+            class="glass-panel p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/60 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-blue-100/50 flex items-center justify-center text-blue-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+              </div>
+              <span class="font-medium text-sm text-brand-dark">导出报表</span>
+            </div>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+          <div
+            class="glass-panel p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/60 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-orange-100/50 flex items-center justify-center text-brand-orange">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                  </path>
+                </svg>
+              </div>
+              <span class="font-medium text-sm text-brand-dark">类别管理</span>
+            </div>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Bar -->
+      <div
+        class="absolute bottom-0 w-full px-6 pb-8 pt-4 bg-white/70 backdrop-blur-xl border-t border-white/50 flex justify-between items-center z-50 rounded-b-[38px]">
+        <button class="flex flex-col items-center gap-1 text-gray-400 hover:text-brand-dark transition-colors">
+          <svg class="w-6 h-6">
+            <use href="#icon-home"></use>
+          </svg>
+          <span class="text-[10px] font-medium">物品</span>
+        </button>
+        <button
+          class="absolute left-1/2 -top-6 transform -translate-x-1/2 bg-brand-dark text-white p-4 rounded-full shadow-lg shadow-brand-dark/30 hover:scale-105 transition-transform">
+          <svg class="w-6 h-6">
+            <use href="#icon-plus"></use>
+          </svg>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-brand-orange">
+          <svg class="w-6 h-6">
+            <use href="#icon-user"></use>
+          </svg>
+          <span class="text-[10px] font-medium">我的</span>
+        </button>
+      </div>
+      <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-gray-300 rounded-full z-50"></div>
+    </div>
+  </div>
+</body>
+
+</html>
