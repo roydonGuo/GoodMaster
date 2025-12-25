@@ -195,3 +195,51 @@ export const deleteItem = async (id: string): Promise<void> => {
 export const generateId = (): string => {
   return Date.now().toString() + Math.random().toString(36).substr(2, 9);
 };
+
+// 获取物品总数
+export const getTotalItemCount = async (): Promise<number> => {
+  const database = getDatabase();
+  const [result] = await database.executeSql('SELECT COUNT(*) as count FROM items');
+  return result.rows.item(0).count;
+};
+
+// 获取本月新增物品数量
+export const getThisMonthNewItemsCount = async (): Promise<number> => {
+  const database = getDatabase();
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+  const endDate = `${year}-${month.toString().padStart(2, '0')}-31`;
+  
+  const [result] = await database.executeSql(
+    'SELECT COUNT(*) as count FROM items WHERE purchaseDate >= ? AND purchaseDate <= ?',
+    [startDate, endDate]
+  );
+  return result.rows.item(0).count;
+};
+
+// 获取最近6个月的资产趋势数据
+export const getLast6MonthsTrend = async (): Promise<Array<{ month: string; value: number }>> => {
+  const database = getDatabase();
+  const now = new Date();
+  const trends: Array<{ month: string; value: number }> = [];
+  
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const monthStr = `${month}月`;
+    const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const endDate = `${year}-${month.toString().padStart(2, '0')}-31`;
+    
+    const [result] = await database.executeSql(
+      'SELECT SUM(price) as total FROM items WHERE purchaseDate <= ?',
+      [endDate]
+    );
+    const total = result.rows.item(0).total || 0;
+    trends.push({ month: monthStr, value: total });
+  }
+  
+  return trends;
+};

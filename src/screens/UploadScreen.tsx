@@ -13,6 +13,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Camera } from 'lucide-react-native';
 import { Theme } from '../theme';
 import { categories } from '../../data';
 import {
@@ -21,7 +22,7 @@ import {
   generateId,
 } from '../database/database';
 import { Item, ItemStatus } from '../types/item';
-import CategoryCard from '../components/CategoryCard';
+import { getIcon } from '../utils/iconHelper';
 
 type Props = {
   theme: Theme;
@@ -141,34 +142,39 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
 
   return (
     <LinearGradient
-      colors={['#fffaf5', '#fef6ee', '#f7f0ff']}
+      colors={['#ede9fe', '#ddd6fe', '#f5f3ff']}
       start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[styles.gradientBg, { paddingTop: insets.top + 20 }]}>
+      end={{ x: 0.5, y: 0.5 }}
+      style={[
+        styles.gradientBackground,
+        { paddingTop: insets.top + 12 },
+      ]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         {/* 顶部标题区域 */}
-        <View style={styles.headerCard}>
-          <Text style={styles.headerTitle}>
-            {editingItem ? '编辑资产' : '添加新资产'}
-          </Text>
-          <Text style={styles.headerSubtitle}>
-            上传图片并填写基础信息
-          </Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={[styles.headerLabel, { color: theme.muted }]}>
+              {editingItem ? '编辑资产' : '添加新资产'}
+            </Text>
+            <Text style={[styles.headerTitle, { color: '#1f2933' }]}>
+              {editingItem ? '更新物品信息' : '上传图片并填写信息'}
+            </Text>
+          </View>
         </View>
 
         {/* 图片上传与预览 */}
         <View style={styles.formGroup}>
-          <Text style={[styles.label, { color: '#6b7280' }]}>物品图片</Text>
+          <Text style={[styles.label, { color: '#4b5563' }]}>物品图片</Text>
           <TouchableOpacity
             style={styles.uploadBox}
-            activeOpacity={0.92}
+            activeOpacity={0.9}
             onPress={async () => {
               const res = await launchImageLibrary({
                 mediaType: 'photo',
-                quality: 0.92,
+                quality: 0.9,
               });
               if (res.didCancel) return;
               const uri = res.assets?.[0]?.uri;
@@ -182,162 +188,164 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
               </View>
             ) : (
               <View style={styles.uploadPlaceholder}>
-                <View style={styles.uploadIcon}>
-                  <Text style={styles.uploadIconText}>📷</Text>
+                <View style={styles.uploadIconContainer}>
+                  <Camera size={32} color="#9ca3af" />
                 </View>
-                <Text style={[styles.uploadText, { color: '#5f6368' }]}>
+                <Text style={[styles.uploadText, { color: '#6b7280' }]}>
                   点击拍照或上传图片
-                </Text>
-                <Text style={[styles.uploadSubText, { color: '#9ca3af' }]}>
-                  支持 jpg / png
                 </Text>
               </View>
             )}
           </TouchableOpacity>
         </View>
 
-        {/* 表单区域 */}
-        <View style={styles.glassCard}>
-          {/* 物品名称 */}
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: '#111827' }]}>物品名称 *</Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: 'rgba(255,255,255,0.92)',
-                  color: '#111827',
-                  borderColor: 'rgba(148,163,184,0.4)',
-                },
-              ]}
-              value={name}
-              onChangeText={setName}
-              placeholder="请输入物品名称"
-              placeholderTextColor="#9ca3af"
-            />
-          </View>
+        {/* 物品名称 */}
+        <View style={styles.formGroup}>
+          <Text style={[styles.label, { color: '#4b5563' }]}>物品名称 *</Text>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="请输入物品名称"
+            placeholderTextColor="#9ca3af"
+          />
+        </View>
 
-          {/* 分类选择 */}
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: '#111827' }]}>分类 *</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoriesList}>
-              {categories.map((category, index) => (
-                <View key={category.id} style={styles.categoryWrapper}>
-                  {index > 0 && <View style={styles.categoryGap} />}
-                  <CategoryCard
-                    category={category}
-                    theme={theme}
-                    isSelected={categoryId === category.id}
-                    onPress={() => setCategoryId(category.id)}
-                  />
+        {/* 分类选择 */}
+        <View style={styles.formGroup}>
+          <Text style={[styles.label, { color: '#4b5563' }]}>分类 *</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesPillsContent}>
+            {categories.map(category => {
+              const active = categoryId === category.id;
+              const IconComponent = getIcon(category.icon) as React.ComponentType<{
+                size?: number;
+                color?: string;
+              }>;
+              return (
+                <View key={category.id} style={styles.chipWrapper}>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => setCategoryId(active ? '' : category.id)}>
+                    <View
+                      style={[
+                        styles.chip,
+                        styles.chipSecondary,
+                        active && styles.chipSecondaryActive,
+                      ]}>
+                      <View style={styles.chipInner}>
+                        <IconComponent
+                          size={16}
+                          color={active ? '#f9fafb' : '#4b5563'}
+                        />
+                        <Text
+                          style={[
+                            styles.chipText,
+                            active && styles.chipTextSecondaryActive,
+                          ]}>
+                          {category.name}
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-              ))}
-            </ScrollView>
-          </View>
+              );
+            })}
+          </ScrollView>
+        </View>
 
-          {/* 状态选择 */}
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: '#111827' }]}>状态 *</Text>
-            <View style={styles.statusContainer}>
-              {statusOptions.map(option => (
+        {/* 状态选择 */}
+        <View style={styles.formGroup}>
+          <Text style={[styles.label, { color: '#4b5563' }]}>状态 *</Text>
+          <View style={styles.statusContainer}>
+            {statusOptions.map(option => {
+              const active = status === option;
+              return (
                 <TouchableOpacity
                   key={option}
                   style={[
-                    styles.statusButton,
-                    {
-                      backgroundColor:
-                        status === option ? theme.accent : theme.card,
-                      borderColor: theme.muted + '40',
-                    },
+                    styles.statusChip,
+                    styles.chipSecondary,
+                    active && styles.chipSecondaryActive,
                   ]}
-                  onPress={() => setStatus(option)}>
+                  onPress={() => setStatus(option)}
+                  activeOpacity={0.7}>
                   <Text
                     style={[
-                      styles.statusText,
-                      {
-                        color: status === option ? '#ffffff' : theme.text,
-                      },
+                      styles.chipText,
+                      active && styles.chipTextSecondaryActive,
                     ]}>
                     {option}
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
+              );
+            })}
           </View>
+        </View>
 
-          {/* 价格 */}
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: '#111827' }]}>价格 *</Text>
+        {/* 价格和入手时间 */}
+        <View style={styles.rowContainer}>
+          <View style={[styles.formGroup, styles.flex1]}>
+            <Text style={[styles.label, { color: '#4b5563' }]}>价格 *</Text>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: 'rgba(255,255,255,0.92)',
-                  color: '#111827',
-                  borderColor: 'rgba(148,163,184,0.4)',
-                },
-              ]}
+              style={styles.input}
               value={price}
               onChangeText={setPrice}
               placeholder="请输入价格"
-              placeholderTextColor={theme.muted}
+              placeholderTextColor="#9ca3af"
               keyboardType="numeric"
             />
           </View>
-
-          {/* 入手时间 */}
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: '#111827' }]}>入手时间 *</Text>
+          <View style={styles.gap} />
+          <View style={[styles.formGroup, styles.flex1]}>
+            <Text style={[styles.label, { color: '#4b5563' }]}>货币</Text>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: 'rgba(255,255,255,0.92)',
-                  color: '#111827',
-                  borderColor: 'rgba(148,163,184,0.4)',
-                },
-              ]}
-              value={purchaseDate}
-              onChangeText={setPurchaseDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={theme.muted}
+              style={styles.input}
+              value="CNY"
+              editable={false}
+              placeholderTextColor="#9ca3af"
             />
           </View>
-
-          {/* 描述 */}
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>描述</Text>
-            <TextInput
-              style={[
-                styles.textArea,
-                {
-                  backgroundColor: theme.card,
-                  color: theme.text,
-                  borderColor: theme.muted + '40',
-                },
-              ]}
-              value={description}
-              onChangeText={setDescription}
-              placeholder="请输入物品描述（可选）"
-              placeholderTextColor={theme.muted}
-              multiline
-              numberOfLines={4}
-            />
-          </View>
-
-          {/* 提交按钮 */}
-          <TouchableOpacity
-            style={[styles.submitButton, { backgroundColor: theme.accent }]}
-            onPress={handleSubmit}
-            activeOpacity={0.8}>
-            <Text style={styles.submitButtonText}>
-              {editingItem ? '保存修改' : '添加物品'}
-            </Text>
-          </TouchableOpacity>
         </View>
+
+        {/* 入手时间 */}
+        <View style={styles.formGroup}>
+          <Text style={[styles.label, { color: '#4b5563' }]}>入手时间 *</Text>
+          <TextInput
+            style={styles.input}
+            value={purchaseDate}
+            onChangeText={setPurchaseDate}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor="#9ca3af"
+          />
+        </View>
+
+        {/* 描述 */}
+        <View style={styles.formGroup}>
+          <Text style={[styles.label, { color: '#4b5563' }]}>描述</Text>
+          <TextInput
+            style={styles.textArea}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="请输入物品描述（可选）"
+            placeholderTextColor="#9ca3af"
+            multiline
+            numberOfLines={4}
+          />
+        </View>
+
+        {/* 提交按钮 */}
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleSubmit}
+          activeOpacity={0.8}>
+          <Text style={styles.submitButtonText}>
+            {editingItem ? '保存修改' : '添加物品'}
+          </Text>
+        </TouchableOpacity>
+
         {/* 占位 */}
         <View style={styles.placeholder} />
       </ScrollView>
@@ -346,173 +354,164 @@ function UploadScreen({ theme, onItemAdded, editingItem }: Props) {
 }
 
 const styles = StyleSheet.create({
-  gradientBg: {
+  gradientBackground: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingBottom: 24,
-  },
-  container: {
-    flex: 1,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 16,
-    paddingBottom: 20,
   },
-  headerCard: {
-    backgroundColor: 'rgba(255,255,255,0.82)',
-    borderRadius: 20,
-    padding: 16,
+  headerTop: {
     marginBottom: 16,
-    borderWidth: 0.5,
-    borderColor: 'rgba(148,163,184,0.4)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
+  },
+  headerLabel: {
+    fontSize: 12,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '800',
-    letterSpacing: 0.3,
-  },
-  headerSubtitle: {
     marginTop: 4,
-    fontSize: 13,
-    color: '#6b7280',
-  },
-  form: {
-    gap: 20,
-    marginTop: 8,
   },
   formGroup: {
-    gap: 8,
+    marginBottom: 16,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
+    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderColor: 'rgba(148,163,184,0.4)',
+    color: '#111827',
   },
   uploadBox: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    minHeight: 140,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderRadius: 16,
+    padding: 20,
+    minHeight: 160,
     alignItems: 'center',
     justifyContent: 'center',
-    borderColor: 'rgba(148,163,184,0.4)',
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    borderColor: 'rgba(148,163,184,0.5)',
+    backgroundColor: 'rgba(255,255,255,0.6)',
   },
   previewWrapper: {
     width: '100%',
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   previewImage: {
     width: '100%',
-    height: 220,
-    borderRadius: 12,
+    height: 240,
     resizeMode: 'cover',
-  },
-  uploadText: {
-    fontSize: 14,
-  },
-  uploadSubText: {
-    fontSize: 12,
-    marginTop: 4,
   },
   uploadPlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 12,
   },
-  uploadIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: '#ede9fe',
+  uploadIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(237,233,254,0.6)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  uploadIconText: {
-    fontSize: 20,
+  uploadText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
-  glassCard: {
-    backgroundColor: 'rgba(255,255,255,0.88)',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 0.5,
-    borderColor: 'rgba(148,163,184,0.35)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 4,
-    gap: 20,
+  rowContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  flex1: {
+    flex: 1,
+  },
+  gap: {
+    width: 12,
   },
   textArea: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
     minHeight: 100,
     textAlignVertical: 'top',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderColor: 'rgba(148,163,184,0.4)',
+    color: '#111827',
   },
-  categoriesList: {
+  categoriesPillsContent: {
     paddingVertical: 4,
   },
-  categoryWrapper: {
-    flexDirection: 'row',
+  chipWrapper: {
+    marginRight: 8,
   },
-  categoryGap: {
-    width: 12,
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  chipSecondary: {
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    borderColor: 'rgba(148,163,184,0.4)',
+  },
+  chipSecondaryActive: {
+    backgroundColor: '#111827',
+    borderColor: '#111827',
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#4b5563',
+  },
+  chipTextSecondaryActive: {
+    color: '#f9fafb',
+  },
+  chipInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   statusContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
   },
-  statusButton: {
-    flex: 1,
-    paddingVertical: 10,
+  statusChip: {
     paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 8,
+    borderRadius: 999,
     borderWidth: 1,
-    alignItems: 'center',
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   submitButton: {
     marginTop: 8,
+    marginBottom: 8,
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 16,
     alignItems: 'center',
+    backgroundColor: '#111827',
   },
   submitButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
-  placeholder:{
-    height: 60,
-  }
+  placeholder: {
+    height: 100,
+  },
 });
 
 export default UploadScreen;

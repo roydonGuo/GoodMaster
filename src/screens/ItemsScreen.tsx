@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   placeholder:{
-    height: 60,
+    height: 80,
   }
 });
 

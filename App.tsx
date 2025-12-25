@@ -20,15 +20,17 @@ import {
   useColorScheme,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Home, UploadCloud, User } from 'lucide-react-native';
+import { Home, Plus, User } from 'lucide-react-native';
 import ItemsScreen from './src/screens/ItemsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import UploadScreen from './src/screens/UploadScreen';
+import CategoryManagementScreen from './src/screens/CategoryManagementScreen';
 import { createTheme, Theme } from './src/theme';
 import { initDatabase } from './src/database/database';
 import { Item } from './src/types/item';
 
 type TabKey = 'items' | 'upload' | 'profile';
+type Screen = TabKey | 'categoryManagement';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -81,6 +83,7 @@ function App() {
 
 function AppContent({ isDarkMode }: { isDarkMode: boolean }) {
   const [activeTab, setActiveTab] = useState<TabKey>('items');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('items');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const insets = useSafeAreaInsets();
@@ -97,7 +100,25 @@ function AppContent({ isDarkMode }: { isDarkMode: boolean }) {
     setActiveTab('upload');
   };
 
+  const handleNavigateToCategoryManagement = () => {
+    setCurrentScreen('categoryManagement');
+  };
+
+  const handleBackFromCategoryManagement = () => {
+    setCurrentScreen('profile');
+    setActiveTab('profile');
+  };
+
   const renderContent = () => {
+    if (currentScreen === 'categoryManagement') {
+      return (
+        <CategoryManagementScreen
+          theme={theme}
+          onBack={handleBackFromCategoryManagement}
+        />
+      );
+    }
+
     switch (activeTab) {
       case 'items':
         return (
@@ -116,7 +137,13 @@ function AppContent({ isDarkMode }: { isDarkMode: boolean }) {
           />
         );
       case 'profile':
-        return <ProfileScreen theme={theme} />;
+        return (
+          <ProfileScreen
+            theme={theme}
+            refreshTrigger={refreshTrigger}
+            onNavigateToCategoryManagement={handleNavigateToCategoryManagement}
+          />
+        );
       default:
         return null;
     }
@@ -129,8 +156,8 @@ function AppContent({ isDarkMode }: { isDarkMode: boolean }) {
         style={[
           styles.tabBar,
           {
-            paddingBottom: Math.max(insets.bottom, 6),
-            backgroundColor: 'rgba(255,255,255,0.9)',
+            paddingBottom: Math.max(insets.bottom, 4),
+            paddingTop: 2,
           },
         ]}>
         <TabButton
@@ -138,32 +165,26 @@ function AppContent({ isDarkMode }: { isDarkMode: boolean }) {
           icon={
             <Home
               color={activeTab === 'items' ? theme.accent : theme.muted}
-              size={20}
+              size={22}
             />
           }
           active={activeTab === 'items'}
           onPress={() => setActiveTab('items')}
           theme={theme}
         />
-        <TabButton
-          label=""
-          icon={
-            <UploadCloud
-              color={activeTab === 'upload' ? theme.accent : theme.muted}
-              size={22}
-            />
-          }
-          active={activeTab === 'upload'}
-          onPress={() => setActiveTab('upload')}
-          theme={theme}
-          onlyIcon
-        />
+        <View style={styles.fabContainer}>
+          <FABButton
+            active={activeTab === 'upload'}
+            onPress={() => setActiveTab('upload')}
+            theme={theme}
+          />
+        </View>
         <TabButton
           label="我的"
           icon={
             <User
               color={activeTab === 'profile' ? theme.accent : theme.muted}
-              size={20}
+              size={22}
             />
           }
           active={activeTab === 'profile'}
@@ -209,6 +230,27 @@ function TabButton({
   );
 }
 
+function FABButton({
+  active,
+  onPress,
+  theme,
+}: {
+  active: boolean;
+  onPress: () => void;
+  theme: Theme;
+}) {
+  return (
+    <TouchableOpacity
+      style={[styles.fabButton, { backgroundColor: theme.accent }]}
+      activeOpacity={0.8}
+      onPress={onPress}>
+      <View style={styles.fabIconContainer}>
+        <Plus size={24} color="#ffffff" />
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
   gestureRoot: {
     flex: 1,
@@ -225,24 +267,28 @@ const styles = StyleSheet.create({
     flex: 1, 
   },
   tabBar: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 8,
+    position: 'absolute', 
+    left: 66,
+    right: 66,
+    bottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 0.5,
-    borderColor: 'rgba(240, 240, 240, 0.2)',
-    paddingTop: 6, 
-    elevation: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)', // 高透明度白色背景，模拟毛玻璃效果
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 10, 
   },
   tabButton: {
     flex: 1,
     alignItems: 'center',
     gap: 2,
-    paddingVertical: 2,
+    paddingVertical: 4,
   },
   tabIcon: {
     width: 24,
@@ -251,8 +297,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
+  },
+  fabContainer: {
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -24, // 向上突出，浮在导航栏上方
+  },
+  fabButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fabIconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
